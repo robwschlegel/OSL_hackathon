@@ -1,0 +1,3 @@
+This folder appears empty because the files downloaded for this project are too large to host on GitHub.
+
+In order to populate this folder with the data files needed to run the app, first run 'code/01_data_source.R' then 'cade/02_data_prep.R'.
