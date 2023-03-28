@@ -11,10 +11,15 @@
 library(shiny)
 library(leaflet)
 library(sf)
+# library(RColorBrewer)
 
 # Load coastal types data
 if(!exists("coastal_type")) load("data/coastal_type.RData")
-if(!exists("coastal_type_point")) load("data/coastal_type_point.RData")
+if(!exists("coastal_type_df")) load("data/coastal_type_df.RData")
+# coastal_type_df <- coastal_type_df[1:100,]
+
+# Colour palette
+coast_col <- colorFactor(palette = 'RdYlGn', coastal_type_df$morpho)
 
 
 # UI ----------------------------------------------------------------------
@@ -25,7 +30,12 @@ ui <- bootstrapPage(
   tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
   
   # Base of map
-  leafletOutput("baseMap", width = "100%", height = "100%")
+  leafletOutput("baseMap", width = "100%", height = "100%"),
+  
+  # Buttons etc.
+  absolutePanel(top = 10, right = 10,
+                actionButton("myBeach", "My Beach")
+  )
   
 )
 
@@ -36,11 +46,14 @@ ui <- bootstrapPage(
 server <- function(input, output, session) {
 
   # Base of map
+  # pal <- colorpal()
   output$baseMap <- renderLeaflet({
-    leaflet(coastal_type_point) |> addTiles() |>
+    leaflet(coastal_type_df) |> addTiles() |>
       setView(lng = 15, lat = 45, zoom = 5) |> 
       # leaflet::addTiles()
-      leaflet::addMarkers()
+      leaflet::addCircles(radius = 10000, lng = ~lon, lat = ~lat,
+                          color = ~coast_col(morpho), 
+                          popup = ~as.character(coasttype))
       # leaflet::addPolygons()
       # leaflet::addCircles()
   })

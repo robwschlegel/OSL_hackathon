@@ -39,4 +39,4 @@ vignettes/*.pdf
 .Renviron
 
 # Ignore all data files
-data/*.RData
+backyard/data/*.RData

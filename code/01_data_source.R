@@ -32,20 +32,17 @@ if(file.exists("backyard/data/coastal_type.RData")){
 } else {
   coastal_type <- emodnet_get_layers(
     service = "geology_coastal_behavior",
-    layers = c("coastal_type_20210501_0025_80k_150k"), 
+    layers = c("coastal_type_20210501_2_3m_90m"), 
     reduce_layers = TRUE, crs = 4326)
 }
 
-# Cast to a simpler object type
-coastal_type_multipoint <- st_cast(coastal_type, "MULTIPOINT")
-
-# Cast to a simpler object type
-coastal_type_point <- st_cast(coastal_type, "POINT")
-
 # Convert to dataframe
-coastal_type_df <- sf_to_df(coastal_type)
+coastal_type_df <- sf_to_df(coastal_type) |> 
+  left_join(coastal_type, by = c("sfg_id" = "id", "multipoint_id" = "fid")) |> 
+  dplyr::select(x, y, morpho, coasttype) |> 
+  dplyr::rename(lon = x, lat = y)
 
 # Save coastal type data
 save(coastal_type, file = "backyard/data/coastal_type.RData")
-save(coastal_type_point, file = "backyard/data/coastal_type_point.RData")
+save(coastal_type_df, file = "backyard/data/coastal_type_df.RData")
 
