@@ -10,6 +10,7 @@
 # Load libraries
 library(shiny)
 library(shinyBS)
+library(shinyWidgets)
 library(leaflet)
 library(DT)
 # library(RColorBrewer)
@@ -31,46 +32,129 @@ spp_info <- data.frame(spp_name = c("Sea grass",
                                     "Urchin",
                                     "Grouper",
                                     "Sea turtle"),
-                       spp_link = c('<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Posidonia_oceanica_%28L%29.jpg/220px-Posidonia_oceanica_%28L%29.jpg" height="70"></img>',
-                                    '<img src="https://images.theconversation.com/files/443875/original/file-20220201-25-lb03xa.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=1200&h=900.0&fit=crop" height="70"></img>',
-                                    '<img src="https://upload.wikimedia.org/wikipedia/commons/5/54/Arbacia_lixula_(oursin_noir).JPG" height="70"></img>',
-                                    '<img src="https://thumbs.dreamstime.com/b/typical-fish-mediterranean-sea-10107134.jpg" height="70"></img>',
-                                    '<img src="https://cdn.unitycms.io/images/AKDs2OsvKwAAzbfxBGZf3W.jpg?op=focus&val=1200,1200,1000,1000,0,0,500,500&sum=8rkP1R-eoD4" height="70"></img>'))
+                       spp_link = c('<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Posidonia_oceanica_%28L%29.jpg/220px-Posidonia_oceanica_%28L%29.jpg" height="100"></img>',
+                                    '<img src="https://images.theconversation.com/files/443875/original/file-20220201-25-lb03xa.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=1200&h=900.0&fit=crop" height="100"></img>',
+                                    '<img src="https://upload.wikimedia.org/wikipedia/commons/5/54/Arbacia_lixula_(oursin_noir).JPG" height="100"></img>',
+                                    '<img src="https://thumbs.dreamstime.com/b/typical-fish-mediterranean-sea-10107134.jpg" height="100"></img>',
+                                    '<img src="https://cdn.unitycms.io/images/AKDs2OsvKwAAzbfxBGZf3W.jpg?op=focus&val=1200,1200,1000,1000,0,0,500,500&sum=8rkP1R-eoD4" height="120"></img>'))
 
 # Dummy time series for demo
 spp_ts <- data.frame(obs_date = c(),
                      obs_spp = c())
 
 # Association for demo
-ass_info <- data.frame(logo = c("https://darse.fr/v2/wp-content/uploads/2023/01/cropped-photosite6-e1672867323901-1.png",
-                                "http://www.radedevillefranche.fr/wp-content/uploads/2021/02/8.png",
-                                "https://nausicaa-plongee.com/images/nausicaa/logo-full.svg",
-                                "https://www.initiativesoceanes.org/wp-content/uploads/2020/10/logobleu.svg"),
-                       name = c("Association de la sauvegarde du patrimoine maritime de Villefranche-sur-Mer",
-                                "Association des amis de la rade de Villefranche-sur-Mer",
-                                "Club de plongée nausicaa",
-                                "Organise your own beach waste collection"),
-                       link = c("https://darse.fr/v2/",
-                                "http://www.radedevillefranche.fr",
-                                "https://www.nausicaa-plongee.com",
-                                "https://www.initiativesoceanes.org/agir/organiser/"))
+ass_info <- data.frame(logo = c('<img src="https://darse.fr/v2/wp-content/uploads/2023/01/cropped-photosite6-e1672867323901-1.png" height="100"></img>',
+                                '<img src="http://www.radedevillefranche.fr/wp-content/uploads/2021/02/8.png" height="100"></img>',
+                                '<img src="https://nausicaa-plongee.com/images/nausicaa/logo-full.svg" height="100"></img>',
+                                '<img src="https://www.initiativesoceanes.org/wp-content/uploads/2020/10/logobleu.svg" height="100"></img>'),
+                       link = c('<a target="_blank" rel="noopener noreferrer" href="https://darse.fr/v2/">Association de la sauvegarde du patrimoine maritime de Villefranche-sur-Mer</a>',
+                                '<a target="_blank" rel="noopener noreferrer" href="http://www.radedevillefranche.fr">Association des amis de la rade de Villefranche-sur-Mer</a>',
+                                '<a target="_blank" rel="noopener noreferrer" href="https://www.nausicaa-plongee.com">Club de plongée nausicaa</a>',
+                                '<a target="_blank" rel="noopener noreferrer" href="https://www.initiativesoceanes.org/agir/organiser/">Organise your own beach waste collection</a>'))
+
+# set image urls -- for ease, I'm calling them here
+top_left <- "https://images.unsplash.com/photo-1495834041987-92052c2f2865?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=3d771d2cc226047515072dba7a5f03bc&auto=format&fit=crop&w=1050&q=80"
+top_right <- "https://images.unsplash.com/photo-1494088391210-792bbadb00f4?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=a421613e91c8475243ad4630171f4374&auto=format&fit=crop&w=1050&q=80"
+bottom_left <- "https://images.unsplash.com/photo-1526411061437-7a7d51ec44c8?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=e507916666b43919185fb16cf4e71813&auto=format&fit=crop&w=1050&q=80"
+bottom_right <- "https://images.unsplash.com/photo-1525869916826-972885c91c1e?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=f7cce16b11befb3dc6ed56074727b7b6&auto=format&fit=crop&w=1050&q=80"
+
 
 
 # UI ----------------------------------------------------------------------
 
-# Define UI for application that draws a histogram
-ui <- bootstrapPage(
+# UI for map as the landing page
+# ui <- bootstrapPage(
 
-  tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
+  # tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
   
   # Base of map
-  leafletOutput("baseMap", width = "100%", height = "100%"),
+  # leafletOutput("baseMap", width = "100%", height = "100%"),
   
   # Buttons etc.
-  absolutePanel(top = 10, right = 10,
-                actionButton("myBeach", "My Beach")
-  )
+#   absolutePanel(top = 10, right = 10,
+#                 actionButton("myBeach", "My Beach")
+#   )
+#   
+# )
+
+# UI for picture as the landing page
+# ui <- fluidPage(
+#   
+#   # Title
+#   # tags$h2("What's happening in my back yard"),
+#   titlePanel("What's happening in my back yard""),
+#   # Background image
+#   setBackgroundImage(
+#     src = "https://st2.depositphotos.com/29169508/45409/i/1600/depositphotos_454090468-stock-photo-mediterranean-sea-peaceful-rocky-beach.jpg"
+#   ),
+#   
+#   # My beach button
+#   absolutePanel(top = 80, left = 50,
+#                   actionButton("myBeach", "My Beach")),
+#   
+#   # Launch coastline map
+#   absolutePanel(top = 80, left = 100,
+#                 actionButton("beachMap", "EU Coastline")),
+#   
+#   # Buttons etc.
+#   absolutePanel(top = 100, left = 75,
+#                 actionButton("references", "References")),
+#   
+# )
+
+# UI for css controlled page
+# ui
+ui <- tagList(
+
+  # head + css
+  tags$head(
+    tags$link(href="app.css", rel="stylesheet", type="text/css")
+  ),
   
+  # UI
+  shinyUI(
+    
+    # layout
+    # navbarPage(title = 'National Park',
+               
+               
+               # tab 1: landing page
+               # tabPanel(title = "Home", 
+                        
+                        # parent container
+                        tags$div(class="landing-wrapper",
+                                 
+                                 # child element 1: images
+                                 tags$div(class = "landing-block background-content",
+                                          
+                                          # background
+                                          img(src = "https://st2.depositphotos.com/29169508/45409/i/1600/depositphotos_454090468-stock-photo-mediterranean-sea-peaceful-rocky-beach.jpg"),
+                                          
+                                 ),
+                                 
+                                 # child element 2: content
+                                 tags$div(class = "landing-block foreground-content",
+                                          tags$div(class = "foreground-text",
+                                                   tags$h1("What's happening in my back yard"),
+                                                   actionButton("myBeach", "My Beach"),
+                                                   actionButton("beachMap", "EU Coastline"),
+                                                   actionButton("references", "References")
+                                                   # tags$p("This shiny app demonstrates
+                                                   #   how to create a 2 x 2 layout
+                                                   #            using css grid and
+                                                   #            overlaying content."),
+                                                   # tags$p("Isn't this cool?"),
+                                                   # tags$p("Yes it is!")
+                                          )
+                                 )
+                        )
+               ),
+               
+               #'////////////////////////////////////////
+               # tab 2: data
+               # tabPanel(title = "Data")
+    # )
+  # )
 )
 
 
@@ -94,17 +178,24 @@ server <- function(input, output, session) {
                           popup = ~as.character(coasttype))
   })
   
+  # Unrendered, for testing
+  baseMapFlat <- leaflet(coastal_type_df) |> addTiles() |>
+      setView(lng = 15, lat = 45, zoom = 5) |> 
+      leaflet::addCircles(radius = 10000, lng = ~lon, lat = ~lat,
+                          color = ~coast_col(morpho), 
+                          popup = ~as.character(coasttype))
 
-  # Modal panel -------------------------------------------------------------
+  # Modal panels ------------------------------------------------------------
 
   # Prep photo links
   main_photo <- "picture_darse"
   
-  # Modal code
+  # Modal UI code
   observeEvent(input$myBeach, {
     showModal(
       modalDialog(size = "l",
                   title = "Plage de la Darse",
+                  easyClose = TRUE,
                   fluidPage(
                     tabsetPanel(
                       tabPanel(title = "Photos",
@@ -125,7 +216,7 @@ server <- function(input, output, session) {
                       tabPanel(title = "Community",
                                br(),
                                renderDataTable({
-                                 datatable(modalDataLocals,
+                                 datatable(ass_info, escape = FALSE,
                                            options = list(pageLength = 10))
                                })),
                       # tabPanel(title = "Time series",
@@ -146,6 +237,26 @@ server <- function(input, output, session) {
                     )
                   )
       )
+  })
+  
+  # Modal map code
+  observeEvent(input$beachMap, {
+    # renderUI({
+      showModal(
+        modalDialog(size = "l",
+                    title = "EU coastal types",
+                    easyClose = TRUE,
+                  # bootstrapPage(
+                    
+                    # tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
+                    
+                    # Base of map
+                    # leafletOutput("baseMap", width = "100%", height = "100%")
+                  renderLeaflet({baseMapFlat})
+                  # )
+      )
+    )
+  # })
   })
   
 }
