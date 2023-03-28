@@ -81,11 +81,11 @@ ui <- fluidPage(
   # titlePanel("What's happening in my back yard"),
   # Background image
   setBackgroundImage(
-    src = "https://st2.depositphotos.com/29169508/45409/i/1600/depositphotos_454090468-stock-photo-mediterranean-sea-peaceful-rocky-beach.jpg"
+    src = "https://media.istockphoto.com/id/863840138/fr/photo/estran-rocheux-avec-l%C3%A9cole-des-poissons-sous-leau-france.jpg?s=612x612&w=0&k=20&c=WMDdBuIQekNkCYtCYqyYRWobLRLOgJp06XgZXzrVvCk="
   ),
 
   # Buttons
-  absolutePanel(top = 500, left = 650, class = "panel panel-default",
+  absolutePanel(top = 200, left = 650, class = "panel panel-default",
                 tags$h1("What's happening in my back yard"),
                 fluidRow(
                   column(width = 1),
