@@ -1,8 +1,6 @@
 # This is a Shiny web application. 
 # One may run the application by clicking the 'Run App' button above.
-#
-# To populate the 'data' folder with the neccessary files to run this app,
-# first run 'code/01_data_source.R' then code/02_data_prep.R'.
+# To populate the 'data' folder first run 'code/01_data_source.R' 
 
 
 # Setup -------------------------------------------------------------------
@@ -12,13 +10,12 @@ library(shiny)
 library(shinyBS)
 library(shinyWidgets)
 library(leaflet)
+library(ggplot2)
+library(plotly)
 library(DT)
-# library(RColorBrewer)
 
 # Load coastal types data
-if(!exists("coastal_type")) load("data/coastal_type.RData")
-if(!exists("coastal_type_df")) load("data/coastal_type_df.RData")
-# coastal_type_df <- coastal_type_df[1:100,]
+load("data/coastal_type_df.RData")
 
 # Colour palette
 coast_col <- colorFactor(palette = 'RdYlGn', coastal_type_df$morpho)
@@ -39,8 +36,14 @@ spp_info <- data.frame(spp_name = c("Sea grass",
                                     '<img src="https://cdn.unitycms.io/images/AKDs2OsvKwAAzbfxBGZf3W.jpg?op=focus&val=1200,1200,1000,1000,0,0,500,500&sum=8rkP1R-eoD4" height="120"></img>'))
 
 # Dummy time series for demo
-spp_ts <- data.frame(obs_date = c(),
-                     obs_spp = c())
+spp_ts <- data.frame(obs_date = c(2014:2023, 
+                                  2015, 2017, 2019, 2020,
+                                  2014, 2017, 2019, 2020, 2021, 2022, 2023,
+                                  2014, 2019, 2021),
+                     obs_spp = c(rep("Sea grass", 10),
+                                 rep("Octopus", 4),
+                                 rep("Urchin", 7),
+                                 rep("Grouper", 3)))
 
 # Association for demo
 ass_info <- data.frame(logo = c('<img src="https://darse.fr/v2/wp-content/uploads/2023/01/cropped-photosite6-e1672867323901-1.png" height="100"></img>',
@@ -51,13 +54,6 @@ ass_info <- data.frame(logo = c('<img src="https://darse.fr/v2/wp-content/upload
                                 '<a target="_blank" rel="noopener noreferrer" href="http://www.radedevillefranche.fr">Association des amis de la rade de Villefranche-sur-Mer</a>',
                                 '<a target="_blank" rel="noopener noreferrer" href="https://www.nausicaa-plongee.com">Club de plongée nausicaa</a>',
                                 '<a target="_blank" rel="noopener noreferrer" href="https://www.initiativesoceanes.org/agir/organiser/">Organise your own beach waste collection</a>'))
-
-# set image urls -- for ease, I'm calling them here
-top_left <- "https://images.unsplash.com/photo-1495834041987-92052c2f2865?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=3d771d2cc226047515072dba7a5f03bc&auto=format&fit=crop&w=1050&q=80"
-top_right <- "https://images.unsplash.com/photo-1494088391210-792bbadb00f4?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=a421613e91c8475243ad4630171f4374&auto=format&fit=crop&w=1050&q=80"
-bottom_left <- "https://images.unsplash.com/photo-1526411061437-7a7d51ec44c8?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=e507916666b43919185fb16cf4e71813&auto=format&fit=crop&w=1050&q=80"
-bottom_right <- "https://images.unsplash.com/photo-1525869916826-972885c91c1e?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=f7cce16b11befb3dc6ed56074727b7b6&auto=format&fit=crop&w=1050&q=80"
-
 
 
 # UI ----------------------------------------------------------------------
@@ -78,83 +74,35 @@ bottom_right <- "https://images.unsplash.com/photo-1525869916826-972885c91c1e?ix
 # )
 
 # UI for picture as the landing page
-# ui <- fluidPage(
-#   
-#   # Title
-#   # tags$h2("What's happening in my back yard"),
-#   titlePanel("What's happening in my back yard""),
-#   # Background image
-#   setBackgroundImage(
-#     src = "https://st2.depositphotos.com/29169508/45409/i/1600/depositphotos_454090468-stock-photo-mediterranean-sea-peaceful-rocky-beach.jpg"
-#   ),
-#   
-#   # My beach button
-#   absolutePanel(top = 80, left = 50,
-#                   actionButton("myBeach", "My Beach")),
-#   
-#   # Launch coastline map
-#   absolutePanel(top = 80, left = 100,
-#                 actionButton("beachMap", "EU Coastline")),
-#   
-#   # Buttons etc.
-#   absolutePanel(top = 100, left = 75,
-#                 actionButton("references", "References")),
-#   
-# )
+ui <- fluidPage(
 
-# UI for css controlled page
-# ui
-ui <- tagList(
-
-  # head + css
-  tags$head(
-    tags$link(href="app.css", rel="stylesheet", type="text/css")
+  # Title
+  # tags$h2("What's happening in my back yard"),
+  # titlePanel("What's happening in my back yard"),
+  # Background image
+  setBackgroundImage(
+    src = "https://st2.depositphotos.com/29169508/45409/i/1600/depositphotos_454090468-stock-photo-mediterranean-sea-peaceful-rocky-beach.jpg"
   ),
-  
-  # UI
-  shinyUI(
-    
-    # layout
-    # navbarPage(title = 'National Park',
-               
-               
-               # tab 1: landing page
-               # tabPanel(title = "Home", 
-                        
-                        # parent container
-                        tags$div(class="landing-wrapper",
-                                 
-                                 # child element 1: images
-                                 tags$div(class = "landing-block background-content",
-                                          
-                                          # background
-                                          img(src = "https://st2.depositphotos.com/29169508/45409/i/1600/depositphotos_454090468-stock-photo-mediterranean-sea-peaceful-rocky-beach.jpg"),
-                                          
-                                 ),
-                                 
-                                 # child element 2: content
-                                 tags$div(class = "landing-block foreground-content",
-                                          tags$div(class = "foreground-text",
-                                                   tags$h1("What's happening in my back yard"),
-                                                   actionButton("myBeach", "My Beach"),
-                                                   actionButton("beachMap", "EU Coastline"),
-                                                   actionButton("references", "References")
-                                                   # tags$p("This shiny app demonstrates
-                                                   #   how to create a 2 x 2 layout
-                                                   #            using css grid and
-                                                   #            overlaying content."),
-                                                   # tags$p("Isn't this cool?"),
-                                                   # tags$p("Yes it is!")
-                                          )
-                                 )
-                        )
-               ),
-               
-               #'////////////////////////////////////////
-               # tab 2: data
-               # tabPanel(title = "Data")
-    # )
-  # )
+
+  # Buttons
+  absolutePanel(top = 400, left = 600, class = "panel panel-default",
+                tags$h1("What's happening in my back yard"),
+                fluidRow(
+                  column(width = 1),
+                  column(width = 4,
+                         actionButton("beachMap", "EU Coastline")),
+                  column(width = 2),
+                  column(width = 4,
+                         actionButton("myBeach", "My Beach")),
+                  column(width = 1)),
+                fluidRow(),
+                fluidRow(
+                  column(width = 4),
+                  column(width = 4,
+                         actionButton("references", "References")),
+                  column(width = 4)
+                  )
+                )
 )
 
 
@@ -163,6 +111,7 @@ ui <- tagList(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
 
+  
   # Images ------------------------------------------------------------------
   
   output$picture_darse <- renderText({c('<img src="',src_darse,'" width=800px>')})
@@ -185,6 +134,7 @@ server <- function(input, output, session) {
                           color = ~coast_col(morpho), 
                           popup = ~as.character(coasttype))
 
+  
   # Modal panels ------------------------------------------------------------
 
   # Prep photo links
@@ -209,54 +159,55 @@ server <- function(input, output, session) {
                                })),
                       tabPanel(title = "Sightings",
                                br(),
-                               renderDataTable({
-                                 datatable(modalDataLocals,
-                                           options = list(pageLength = 10))
-                               })),
+                               renderPlotly({
+                                            ggplotly(
+                                              spp_ts |> 
+                                                ggplot(aes(x = obs_date)) +
+                                                geom_bar(aes(fill = obs_spp)) +
+                                                labs(x = NULL, y = "Locals") +
+                                                theme(legend.position = "none",
+                                                      panel.border = element_rect(fill = NA, colour = "black"))
+                                            )
+                                          }),
+                               shiny::selectInput(label = "Local sightings", inputId = "sightings", 
+                                                  choices = unique(spp_info$spp_name), multiple = TRUE),
+                               shiny::actionButton("sight_upload", "Submit")
+                               
+                      ),
                       tabPanel(title = "Community",
                                br(),
                                renderDataTable({
                                  datatable(ass_info, escape = FALSE,
                                            options = list(pageLength = 10))
-                               })),
-                      # tabPanel(title = "Time series",
-                      #          br(),
-                      #          renderPlotly({
-                      #            ggplotly(
-                      #              modalData %>% 
-                      #                ggplot(aes(x = date, y = T2m)) +
-                      #                geom_line() +
-                      #                geom_point() +
-                      #                geom_smooth(method = "lm", se = F) +
-                      #                scale_x_date(expand = c(0, 0)) +
-                      #                labs(x = NULL, y = "T2m (°C)") +
-                      #                theme(panel.border = element_rect(fill = NA, colour = "black"))
-                      #            )
-                      #          })
-                      )
+                               }))
                     )
                   )
+      )
       )
   })
   
   # Modal map code
   observeEvent(input$beachMap, {
-    # renderUI({
       showModal(
         modalDialog(size = "l",
                     title = "EU coastal types",
                     easyClose = TRUE,
-                  # bootstrapPage(
-                    
-                    # tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
-                    
-                    # Base of map
-                    # leafletOutput("baseMap", width = "100%", height = "100%")
                   renderLeaflet({baseMapFlat})
-                  # )
       )
     )
-  # })
+  })
+  
+  # References map code
+  observeEvent(input$references, {
+    showModal(
+      modalDialog(size = "l",
+                  title = "EU coastal types",
+                  easyClose = TRUE,
+                  tags$p("Krystalli A, Fernández-Bejarano S, Salmon M (????). _EMODnetWFS: Access EMODnet Web Feature Service data through R_. R
+  package version 2.0.1.9001. Integrated data products created under the European Marine Observation Data Network (EMODnet)
+  Biology project (EASME/EMFF/2017/1.3.1.2/02/SI2.789013), funded by the by the European Union under Regulation (EU) No
+  508/2014 of the European Parliament and of the Council of 15 May 2014 on the European Maritime and Fisheries Fund,
+  <https://github.com/EMODnet/EMODnetWFS>.")))
   })
   
 }
