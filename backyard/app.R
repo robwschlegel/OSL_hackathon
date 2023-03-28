@@ -85,7 +85,7 @@ ui <- fluidPage(
   ),
 
   # Buttons
-  absolutePanel(top = 400, left = 600, class = "panel panel-default",
+  absolutePanel(top = 500, left = 650, class = "panel panel-default",
                 tags$h1("What's happening in my back yard"),
                 fluidRow(
                   column(width = 1),
